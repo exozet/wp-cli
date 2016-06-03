@@ -247,6 +247,55 @@ class DB_Command extends WP_CLI_Command {
 		WP_CLI::success( sprintf( 'Imported from %s', $result_file ) );
 	}
 
+    /**
+     * @param $args
+     * @param $assoc_args
+     */
+    function export_with_placeholder($args, $assoc_args)
+    {
+        $this->export($args, $assoc_args);
+
+        $result_file = $this->get_file_name($args);
+        $replace = DB_PLACEHOLDER;
+        $string = WP_HOME;
+
+        if (!empty($string) && !empty($replace)) {
+            $new_file = 'export.'.$result_file;
+
+            system('sed -e "s@'.$string.'@'.$replace.'@g" < '.$result_file.' > '.$new_file.' && rm '.$result_file);
+
+            if (!$stdout) {
+                WP_CLI::success(sprintf('Exported to %s with placeholder', $new_file));
+            }
+        }
+    }
+
+    /**
+     * @param $args
+     * @param $assoc_args
+     */
+    function import_with_placeholder($args, $assoc_args)
+    {
+        $result_file = $this->get_file_name($args);
+        $replace = DB_PLACEHOLDER;
+        $string = WP_HOME;
+
+
+        if (!empty($string) && !empty($replace)) {
+            $new_file = 'import.'.$result_file;
+            $args[0] = $new_file;
+
+            system('sed -e "s@'.$replace.'@'.$string.'@g" < '.$result_file.' > '.$new_file);
+
+            $this->import($args, $assoc_args);
+
+            system('rm '.$new_file);
+
+        } else {
+            $this->import($args, $assoc_args);
+        }
+    }
+
 	/**
 	 * List the MySQL database tables.
 	 *
