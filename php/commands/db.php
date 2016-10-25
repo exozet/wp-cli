@@ -253,19 +253,19 @@ class DB_Command extends WP_CLI_Command {
      */
     function export_with_placeholder($args, $assoc_args)
     {
-        $this->export($args, $assoc_args);
-
-        $result_file = $this->get_file_name($args);
-        $replace = DB_PLACEHOLDER;
-        $string = WP_HOME;
+        $replace    = DB_PLACEHOLDER;
+        $string     = WP_HOME;
 
         if (!empty($string) && !empty($replace)) {
-            $new_file = 'export.'.$result_file;
 
-            system('sed -e "s@'.$string.'@'.$replace.'@g" < '.$result_file.' > '.$new_file.' && rm '.$result_file);
+            system('wp search-replace ' . $string . ' ' . $replace . ' --skip-columns=guid');
+
+            $this->export($args, $assoc_args);
+
+            system('wp search-replace ' . $replace . ' ' . $string . ' --skip-columns=guid');
 
             if (!$stdout) {
-                WP_CLI::success(sprintf('Exported to %s with placeholder', $new_file));
+                WP_CLI::success(sprintf('Exported to %s with placeholder', $args[0]));
             }
         }
     }
@@ -276,23 +276,18 @@ class DB_Command extends WP_CLI_Command {
      */
     function import_with_placeholder($args, $assoc_args)
     {
-        $result_file = $this->get_file_name($args);
-        $replace = DB_PLACEHOLDER;
-        $string = WP_HOME;
-
+        $replace    = DB_PLACEHOLDER;
+        $string     = WP_HOME;
 
         if (!empty($string) && !empty($replace)) {
-            $new_file = 'import.'.$result_file;
-            $args[0] = $new_file;
-
-            system('sed -e "s@'.$replace.'@'.$string.'@g" < '.$result_file.' > '.$new_file);
 
             $this->import($args, $assoc_args);
 
-            system('rm '.$new_file);
+            system('wp search-replace ' . $replace . ' ' . $string . ' --skip-columns=guid');
 
-        } else {
-            $this->import($args, $assoc_args);
+            if (!$stdout) {
+                WP_CLI::success(sprintf('Imported from %s with placeholder', $args[0]));
+            }
         }
     }
 
