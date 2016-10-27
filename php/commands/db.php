@@ -247,27 +247,19 @@ class DB_Command extends WP_CLI_Command {
 		WP_CLI::success( sprintf( 'Imported from %s', $result_file ) );
 	}
 
+
     /**
      * @param $args
      * @param $assoc_args
      */
     function export_with_placeholder($args, $assoc_args)
     {
-        $replace    = DB_PLACEHOLDER;
-        $string     = WP_HOME;
+        $from   = WP_HOME;
+        $to     = DB_PLACEHOLDER;
 
-        if (!empty($string) && !empty($replace)) {
+        $this->export($args, $assoc_args);
 
-            system('wp search-replace ' . $string . ' ' . $replace . ' --skip-columns=guid');
-
-            $this->export($args, $assoc_args);
-
-            system('wp search-replace ' . $replace . ' ' . $string . ' --skip-columns=guid');
-
-            if (!$stdout) {
-                WP_CLI::success(sprintf('Exported to %s with placeholder', $args[0]));
-            }
-        }
+        system('sed -e "s@'.$from.'@'.$to.'@g" < '.$args[0].' > new.'.$args[0].' && mv new.'.$args[0].' '.$args[0]);
     }
 
     /**
@@ -276,20 +268,14 @@ class DB_Command extends WP_CLI_Command {
      */
     function import_with_placeholder($args, $assoc_args)
     {
-        $replace    = DB_PLACEHOLDER;
-        $string     = WP_HOME;
+        $from   = DB_PLACEHOLDER;
+        $to     = WP_HOME;
 
-        if (!empty($string) && !empty($replace)) {
+        system('sed -e "s@' . $from . '@' . $to . '@g" < '.$args[0].' > new.'.$args[0].' && mv new.'.$args[0].' '.$args[0]);
 
-            $this->import($args, $assoc_args);
-
-            system('wp search-replace ' . $replace . ' ' . $string . ' --skip-columns=guid');
-
-            if (!$stdout) {
-                WP_CLI::success(sprintf('Imported from %s with placeholder', $args[0]));
-            }
-        }
+        $this->import($args, $assoc_args);
     }
+
 
 	/**
 	 * List the MySQL database tables.
