@@ -259,7 +259,7 @@ class DB_Command extends WP_CLI_Command {
 
         $this->export($args, $assoc_args);
 
-        system('sed -e "s@'.$from.'@'.$to.'@g" < '.$args[0].' > new.'.$args[0].' && mv new.'.$args[0].' '.$args[0]);
+        system('sed -i "s@'.$from.'@'.$to.'@g" '.$args[0]);
     }
 
     /**
@@ -271,7 +271,7 @@ class DB_Command extends WP_CLI_Command {
         $from   = DB_PLACEHOLDER;
         $to     = WP_HOME;
 
-        system('sed -e "s@' . $from . '@' . $to . '@g" < '.$args[0].' > new.'.$args[0].' && mv new.'.$args[0].' '.$args[0]);
+        system('sed -i "s@' . $from . '@' . $to . '@g" '.$args[0]);
 
         $this->import($args, $assoc_args);
     }
