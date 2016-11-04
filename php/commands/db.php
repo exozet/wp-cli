@@ -274,6 +274,8 @@ class DB_Command extends WP_CLI_Command {
         system('sed -i "s@' . $from . '@' . $to . '@g" '.$args[0]);
 
         $this->import($args, $assoc_args);
+
+	system('sed -i "s@' . $to . '@' . $from . '@g" '.$args[0]);
     }
 
 
